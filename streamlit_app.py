@@ -2,6 +2,7 @@
 import streamlit as st
 from snowflake.snowpark.functions import col
 import requests
+import pandas as pd
 
 # Write directly to the app
 st.title(":cup_with_straw: Customise Your Smoothie :cup_with_straw:")
@@ -16,8 +17,12 @@ session = cnx.session()
 
 # Get the fruit options from the table
 my_dataframe = session.table("smoothies.public.fruit_options").select(col("FRUIT_NAME"), col('SEARCH_ON')).collect()
-st.dataframe(data=my_dataframe, use_container_width=True)
-st.stop()
+#st.dataframe(data=my_dataframe, use_container_width=True)
+#st.stop()
+
+pd_df = my_dataframe.to_pandas()
+#st.dataframe(pd_df)
+#st.stop()
 # Convert Snowflake Rows to a list of fruit names
 fruit_list = [row['FRUIT_NAME'] for row in my_dataframe]
 
@@ -46,6 +51,8 @@ if ingredients_list:
 
     # Display nutrition information for each fruit
     for fruit in ingredients_list:
+        search_on=pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        st.write('The search value for ', fruit_chosen,' is ', search_on, '.')
         st.subheader(fruit + ' Nutrition Information')
         fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{fruit.lower()}")
         if fruityvice_response.status_code == 200:
