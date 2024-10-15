@@ -48,3 +48,11 @@ if ingredients_list:
     if time_to_insert:
         session.sql(my_insert_stmt).collect()  # Execute the insert query
         st.success('Your Smoothie is ordered!', icon="✅")
+
+from snowflake.snowpark import Session
+from snowflake.snowpark.context import get_active_session
+
+try:
+    session = get_active_session()  # Retrieve an active session if it exists
+except Exception:
+    session = Session.builder.configs(your_config).create()  
