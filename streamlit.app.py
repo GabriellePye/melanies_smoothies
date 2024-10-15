@@ -1,6 +1,8 @@
 # Import python packages
 import streamlit as st
 from snowflake.snowpark.functions import col, when_matched  # Import when_matched
+import requests
+fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
 
 # Initialize the Snowflake session
 cnx = st.connection("snowflake")
@@ -31,8 +33,7 @@ else:
     st.success('There are no pending orders right now', icon='👍')
     # Perform the merge operation
    
-import requests
-fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
+
 # st.text(fruityvice_response.json())
 fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
    # st.success('Merge operation completed successfully!', icon='👍')
