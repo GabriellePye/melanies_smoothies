@@ -15,8 +15,9 @@ cnx = st.connection("snowflake")
 session = cnx.session()
 
 # Get the fruit options from the table
-my_dataframe = session.table("smoothies.public.fruit_options").select(col("FRUIT_NAME")).collect()
-
+my_dataframe = session.table("smoothies.public.fruit_options").select(col("FRUIT_NAME"), col('SEARCH_ON')).collect()
+st.dataframe(data=my_dataframe, use_container_width=True)
+st.stop()
 # Convert Snowflake Rows to a list of fruit names
 fruit_list = [row['FRUIT_NAME'] for row in my_dataframe]
 
