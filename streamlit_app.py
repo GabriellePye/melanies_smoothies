@@ -39,12 +39,18 @@ if ingredients_list:
         INSERT INTO smoothies.public.orders(ingredients, name_on_order)
         VALUES ('{ingredients_string}', '{name_on_order}')
     """
-    st.subheader(fruit_chosen + 'Nutrition Information')
-    fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
-    fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
-
+    
     # Display the SQL for debugging purposes
     st.write(my_insert_stmt)
+
+    # Display nutrition information for each fruit
+    for fruit in ingredients_list:
+        st.subheader(fruit + ' Nutrition Information')
+        fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{fruit.lower()}")
+        if fruityvice_response.status_code == 200:
+            fv_df = st.json(fruityvice_response.json())
+        else:
+            st.write(f"Could not retrieve data for {fruit}")
 
     # Button to submit the order
     time_to_insert = st.button('Submit order')
@@ -52,7 +58,4 @@ if ingredients_list:
     if time_to_insert:
         session.sql(my_insert_stmt).collect()  # Execute the insert query
         st.success('Your Smoothie is ordered!', icon="✅")
-
-
-#st.text(fruityvice_response.json())
 
