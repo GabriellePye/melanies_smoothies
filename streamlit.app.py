@@ -1,6 +1,5 @@
-# Import python packages
+from snowflake.snowpark import Session
 import streamlit as st
-from snowflake.snowpark.context import get_active_session
 from snowflake.snowpark.functions import col
 import requests
 
@@ -8,11 +7,23 @@ import requests
 st.title(":cup_with_straw: Customise Your Smoothie :cup_with_straw:")
 st.write("Choose the fruits you want in your custom Smoothie")
 
+# Snowflake connection details
+connection_parameters = {
+    "account": "<your_account>",
+    "user": "<your_user>",
+    "password": "<your_password>",
+    "role": "<your_role>",
+    "warehouse": "<your_warehouse>",
+    "database": "<your_database>",
+    "schema": "<your_schema>"
+}
+
+# Create a new session
+session = Session.builder.configs(connection_parameters).create()
+
 # Capture the name for the smoothie
 name_on_order = st.text_input("Name on Smoothie:")
 st.write("The name on your Smoothie will be: ", name_on_order)
-
-session = get_active_session()
 
 # Get the fruit options from the table
 my_dataframe = session.table("smoothies.public.fruit_options").select(col("FRUIT_NAME")).collect()
@@ -39,13 +50,14 @@ if ingredients_list:
         INSERT INTO smoothies.public.orders(ingredients, name_on_order)
         VALUES ('{ingredients_string}', '{name_on_order}')
     """
-    st.subheader(fruit_chosen + 'Nutrition Information')
-    fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + fruit_chosen)
-    fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
-
 
     # Display the SQL for debugging purposes
     st.write(my_insert_stmt)
+
+    # Fetch fruit data using an API
+    fruit_chosen = ingredients_list[0]  # Example, based on the first fruit
+    fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + fruit_chosen)
+    fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
 
     # Button to submit the order
     time_to_insert = st.button('Submit order')
@@ -53,6 +65,3 @@ if ingredients_list:
     if time_to_insert:
         session.sql(my_insert_stmt).collect()  # Execute the insert query
         st.success('Your Smoothie is ordered!', icon="✅")
-
-# st.text(fruityvice_response.json())
-
