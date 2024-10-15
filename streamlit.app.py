@@ -31,5 +31,7 @@ else:
     st.success('There are no pending orders right now', icon='👍')
     # Perform the merge operation
    
-    
+import requests
+fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
+st.text(fruityvice_response)
    # st.success('Merge operation completed successfully!', icon='👍')
